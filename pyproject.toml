@@ -43,7 +43,7 @@ dependencies = [
 ]
 
 [project.entry-points.pytest11]
-speed = 'pytest_glucose'
+glucose = 'pytest_glucose'
 
 [project.urls]
 repository = 'https://github.com/samuelcolvin/pytest-glucose'
