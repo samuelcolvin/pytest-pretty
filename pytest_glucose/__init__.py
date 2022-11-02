@@ -1,11 +1,19 @@
 from __future__ import annotations as _annotations
 
+import sys
+
 from functools import partial
 from time import perf_counter_ns
 from typing import TYPE_CHECKING
+from textwrap import shorten
+
+import pytest
 
 from rich.console import Console
 from rich.table import Table
+
+from _pytest.terminal import TerminalReporter, _get_line_with_reprcrash_message
+
 
 if TYPE_CHECKING:
     from _pytest.config import Config
@@ -43,19 +51,54 @@ def print_summary(summary_stats: SummaryStats, stats: dict[str, list[TestReport]
         table.add_column('Error')
         for report in fail_reports:
             file, function_line, func = report.location
-            repr_entries = report.longrepr.chain[-1][0].reprentries
+            try:
+                repr_entries = report.longrepr.chain[-1][0].reprentries
+            except AttributeError:
+                error_line = ''
+                error = ''
+            else:
+                error_line = str(repr_entries[0].reprfileloc.lineno)
+                error = repr_entries[-1].reprfileloc.message
             table.add_row(
                 file,
                 func,
                 str(function_line + 1),
-                str(repr_entries[0].reprfileloc.lineno),
-                repr_entries[-1].reprfileloc.message,
+                error_line,
+                error,
             )
         console.print(table)
-    console.print(f'[bold]Results ({time_taken_ns / 1_000_000_000:0.2f}s):[/]')
+    console.print(f'[bold]Results ({time_taken_ns / 1_000_000_000:0.2f}s):[/]', highlight=False)
     for summary_item in summary_items:
         msg, text_format = summary_item
         text_format.pop('bold', None)
         color = next(k for k, v in text_format.items() if v)
         count, label = msg.split(' ', 1)
         console.print(f'{count:>10} {label}', style=color)
+
+
+class CustomTerminalReporter(TerminalReporter):
+    def pytest_runtest_logreport(self, report: TestReport) -> None:
+        super().pytest_runtest_logreport(report)
+        if report.failed:
+            file, line, func = report.location
+            self._write_progress_information_filling_space()
+            self.ensure_newline()
+            summary = f'{file}:{line} {func}'
+            self._tw.write(summary, red=True)
+            try:
+                msg = report.longrepr.reprcrash.message
+            except AttributeError:
+                pass
+            else:
+                self._tw.write(' - ')
+                available_space = self._tw.fullwidth - len(summary) - 12
+                self._tw.write(shorten(msg, available_space, placeholder='…'))
+
+
+@pytest.mark.trylast
+def pytest_configure(config):
+    # Get the standard terminal reporter plugin and replace it with our
+    standard_reporter = config.pluginmanager.getplugin('terminalreporter')
+    sugar_reporter = CustomTerminalReporter(config, sys.stdout)
+    config.pluginmanager.unregister(standard_reporter)
+    config.pluginmanager.register(sugar_reporter, 'terminalreporter')
