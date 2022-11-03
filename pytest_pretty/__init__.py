@@ -4,11 +4,11 @@ import sys
 
 from time import perf_counter_ns
 from typing import TYPE_CHECKING
-from textwrap import shorten
 
 import pytest
 
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 
 from _pytest.terminal import TerminalReporter
@@ -48,9 +48,10 @@ class CustomTerminalReporter(TerminalReporter):
             except AttributeError:
                 pass
             else:
-                self._tw.write(' - ')
-                available_space = self._tw.fullwidth - len(summary) - 12
-                self._tw.write(shorten(msg, available_space, placeholder='…'))
+                msg = msg.replace('\n', ' ')
+                available_space = self._tw.fullwidth - len(summary) - 15
+                if available_space > 5:
+                    self._tw.write(f' - {msg[:available_space]}…')
 
     def summary_stats(self) -> None:
         time_taken_ns = end_time - start_time
@@ -84,11 +85,11 @@ class CustomTerminalReporter(TerminalReporter):
                     error_line = str(repr_entries[0].reprfileloc.lineno)
                     error = repr_entries[-1].reprfileloc.message
                 table.add_row(
-                    file,
-                    func,
+                    escape(file),
+                    escape(func),
                     str(function_line + 1),
-                    error_line,
-                    error,
+                    escape(error_line),
+                    escape(error),
                 )
             console.print(table)
 

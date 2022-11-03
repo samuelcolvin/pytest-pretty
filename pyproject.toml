@@ -3,10 +3,10 @@ requires = ['hatchling']
 build-backend = 'hatchling.build'
 
 [tool.hatch.version]
-path = 'pytest_glucose/__init__.py'
+path = 'pytest_pretty/__init__.py'
 
 [project]
-name = 'pytest-glucose'
+name = 'pytest-pretty'
 description = 'pytest plugin for printing summary data as I want it'
 authors = [
     {name = 'Samuel Colvin', email = 's@muelcolvin.com'},
@@ -43,10 +43,10 @@ dependencies = [
 ]
 
 [project.entry-points.pytest11]
-glucose = 'pytest_glucose'
+pretty = 'pytest_pretty'
 
 [project.urls]
-repository = 'https://github.com/samuelcolvin/pytest-glucose'
+repository = 'https://github.com/samuelcolvin/pytest-pretty'
 
 [tool.pytest.ini_options]
 testpaths = 'tests'
@@ -62,7 +62,7 @@ multiline_quotes = 'double'
 ignore = ['E203', 'W503']
 
 [tool.coverage.run]
-source = ['pytest_glucose']
+source = ['pytest_pretty']
 branch = true
 
 [tool.coverage.report]
