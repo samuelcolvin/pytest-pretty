@@ -54,12 +54,10 @@ filterwarnings = [
     'error',
 ]
 
-[tool.flake8]
-max_line_length = 120
-max_complexity = 14
-inline_quotes = 'single'
-multiline_quotes = 'double'
-ignore = ['E203', 'W503']
+[tool.ruff]
+line-length = 120
+extend-select = ['Q']
+flake8-quotes = {inline-quotes = 'single', multiline-quotes = 'double'}
 
 [tool.coverage.run]
 source = ['pytest_pretty']

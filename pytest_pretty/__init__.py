@@ -1,17 +1,14 @@
 from __future__ import annotations as _annotations
 
 import sys
-
 from time import perf_counter_ns
 from typing import TYPE_CHECKING
 
 import pytest
-
+from _pytest.terminal import TerminalReporter
 from rich.console import Console
 from rich.markup import escape
 from rich.table import Table
-
-from _pytest.terminal import TerminalReporter
 
 if TYPE_CHECKING:
     from _pytest.reports import TestReport
