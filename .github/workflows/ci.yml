@@ -38,9 +38,57 @@ jobs:
         with:
           extra_args: --all-files --verbose
 
+  test:
+    name: test py${{ matrix.python-version }} on ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - id: cache-py
+        name: cache python
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: >
+            py
+            ${{ runner.os }}
+            ${{ env.pythonLocation }}
+            ${{ hashFiles('requirements/pyproject.txt') }}
+            ${{ hashFiles('pyproject.toml') }}
+
+      - run: pip install -r requirements/pyproject.txt
+        if: steps.cache-py.outputs.cache-hit != 'true'
+
+      - run: pip install -e .
+      - run: pip freeze
+      - run: pytest
+
+  # https://github.com/marketplace/actions/alls-green#why used for branch protection checks
+  check:
+    if: always()
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
   deploy:
     name: Deploy
-    needs: [lint]
+    needs: [check]
     if: "success() && startsWith(github.ref, 'refs/tags/')"
     runs-on: ubuntu-latest
 

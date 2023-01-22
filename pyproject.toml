@@ -60,9 +60,8 @@ repository = 'https://github.com/samuelcolvin/pytest-pretty'
 
 [tool.pytest.ini_options]
 testpaths = 'tests'
-filterwarnings = [
-    'error',
-]
+filterwarnings = 'error'
+xfail_strict = true
 
 [tool.ruff]
 line-length = 120
