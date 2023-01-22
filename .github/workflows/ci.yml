@@ -111,7 +111,7 @@ jobs:
       - name: build
         run: python -m build
 
-      - run: twine check dist/*
+      - run: twine check --strict dist/*
 
       - name: upload to pypi
         run: twine upload dist/*
