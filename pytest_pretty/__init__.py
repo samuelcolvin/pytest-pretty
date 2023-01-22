@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     SummaryStats = tuple[list[tuple[str, dict[str, bool]]], str]
 
-__version__ = '1'
+__version__ = '1.0.1'
 start_time = 0
 end_time = 0
 console = Console()
@@ -91,7 +91,7 @@ class CustomTerminalReporter(TerminalReporter):
             console.print(table)
 
 
-@pytest.mark.trylast
+@pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     # Get the standard terminal reporter plugin and replace it with our
     standard_reporter = config.pluginmanager.getplugin('terminalreporter')
