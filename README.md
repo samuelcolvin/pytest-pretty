@@ -31,6 +31,10 @@ Including time taken for the test run:
 
 ![Test Run Summary](./screenshots/test-run-summary.png)
 
+## Installation
+
+    pip install -U pytest-pretty
+
 ## Usage with GitHub Actions
 
 If you're using pytest-pretty (or inded, just pytest) with GitHub Actions, it's worth adding the following to the top of your workflow `.yml` file:
