@@ -30,3 +30,14 @@ This is extremely useful for navigating to failed tests without having to scroll
 Including time taken for the test run:
 
 ![Test Run Summary](./screenshots/test-run-summary.png)
+
+## Usage with GitHub Actions
+
+If you're using pytest-pretty (or inded, just pytest) with GitHub Actions, it's worth adding the following to the top of your workflow `.yml` file:
+
+```yaml
+env:
+  COLUMNS: 120
+```
+
+This will mean the pytest output is wider and easier to use, more importantly, it'll make the error summary table printed by pytest-pretty much easier to read, see [this](https://github.com/Textualize/rich/issues/2769) discussion for more details.
