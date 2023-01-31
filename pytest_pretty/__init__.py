@@ -1,6 +1,8 @@
 from __future__ import annotations as _annotations
 
+import re
 import sys
+from itertools import dropwhile
 from time import perf_counter_ns
 from typing import TYPE_CHECKING
 
@@ -98,3 +100,48 @@ def pytest_configure(config):
     custom_reporter = CustomTerminalReporter(config, sys.stdout)
     config.pluginmanager.unregister(standard_reporter)
     config.pluginmanager.register(custom_reporter, 'terminalreporter')
+
+
+ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+stat_re = re.compile(r'(\d+) (\w+)')
+
+
+def _new_outcomes(obj):
+    def parseoutcomes():
+        lines_with_stats = dropwhile(lambda x: 'Results' not in x, obj.outlines)
+        next(lines_with_stats)  # drop Results line
+        res = {}
+        for i, line in enumerate(lines_with_stats):
+            line = ansi_escape.sub('', line).strip()  # clean colors
+            match = stat_re.match(line)
+
+            if match is None:
+                break
+
+            res[match.group(2)] = int(match.group(1))
+
+        return res
+
+    return parseoutcomes
+
+
+class PytesterWrapper:
+    def __init__(self, pytester):
+        object.__setattr__(self, 'pytester', pytester)
+
+    def runpytest(self):
+        res = self.pytester.runpytest()
+        assert res is not None
+        res.parseoutcomes = _new_outcomes(res)
+        return res
+
+    def __getattr__(self, name):
+        return getattr(self.pytester, name)
+
+    def __setattr__(self, name, value):
+        setattr(self.pytester, name, value)
+
+
+@pytest.fixture()
+def pytester_pretty(pytester):
+    return PytesterWrapper(pytester)
