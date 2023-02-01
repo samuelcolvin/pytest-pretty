@@ -106,9 +106,20 @@ ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
 stat_re = re.compile(r'(\d+) (\w+)')
 
 
-def _new_outcomes(obj):
+def create_new_parseoutcomes(runresult_instance):
+    """
+    In this function there is a new implementation of `RunResult.parseoutcomes`
+    https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L557
+
+
+    Decision of reimplement this method is made based on implementation of
+    `RunResult.assert_outcomes`
+
+    https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L613
+    """
+
     def parseoutcomes():
-        lines_with_stats = dropwhile(lambda x: 'Results' not in x, obj.outlines)
+        lines_with_stats = dropwhile(lambda x: 'Results' not in x, runresult_instance.outlines)
         next(lines_with_stats)  # drop Results line
         res = {}
         for i, line in enumerate(lines_with_stats):
@@ -126,20 +137,29 @@ def _new_outcomes(obj):
 
 
 class PytesterWrapper:
+    """
+    This is class for for make almost transparent wrapper
+    arround pytester output and allow substitute
+    `parseoutcomes` method of `RunResult` instance.
+    """
+
+    __slot__ = ('_pytester',)
+
     def __init__(self, pytester):
-        object.__setattr__(self, 'pytester', pytester)
+        object.__setattr__(self, '_pytester', pytester)
 
     def runpytest(self):
-        res = self.pytester.runpytest()
+        """wraper to overwritte `parseoutcomes` method of `RunResult` instance"""
+        res = self._pytester.runpytest()
         assert res is not None
-        res.parseoutcomes = _new_outcomes(res)
+        res.parseoutcomes = create_new_parseoutcomes(res)
         return res
 
     def __getattr__(self, name):
-        return getattr(self.pytester, name)
+        return getattr(self._pytester, name)
 
     def __setattr__(self, name, value):
-        setattr(self.pytester, name, value)
+        setattr(self._pytester, name, value)
 
 
 @pytest.fixture()
