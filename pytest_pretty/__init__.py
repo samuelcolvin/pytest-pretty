@@ -4,7 +4,7 @@ import re
 import sys
 from itertools import dropwhile
 from time import perf_counter_ns
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 from _pytest.terminal import TerminalReporter
@@ -106,7 +106,7 @@ ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
 stat_re = re.compile(r'(\d+) (\w+)')
 
 
-def create_new_parseoutcomes(runresult_instance):
+def create_new_parseoutcomes(runresult_instance) -> Callable[[], dict[str, int]]:
     """
     In this function there is a new implementation of `RunResult.parseoutcomes`
     https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L557
@@ -118,7 +118,7 @@ def create_new_parseoutcomes(runresult_instance):
     https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L613
     """
 
-    def parseoutcomes():
+    def parseoutcomes() -> dict[str, int]:
         lines_with_stats = dropwhile(lambda x: 'Results' not in x, runresult_instance.outlines)
         next(lines_with_stats)  # drop Results line
         res = {}
