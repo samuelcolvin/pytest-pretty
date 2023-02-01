@@ -7,8 +7,6 @@
 
 Opinionated pytest plugin to make output slightly easier to read and errors easy to find and fix.
 
-This plugin is inspired by [pytest-sugar](https://pypi.org/project/pytest-sugar/)
-
 pytest-pretty's only dependencies are [rich](https://pypi.org/project/rich/) and pytest itself.
 
 ### Realtime error summary
