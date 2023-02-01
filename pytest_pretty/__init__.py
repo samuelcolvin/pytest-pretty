@@ -1,8 +1,10 @@
 from __future__ import annotations as _annotations
 
+import re
 import sys
+from itertools import dropwhile
 from time import perf_counter_ns
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 from _pytest.terminal import TerminalReporter
@@ -98,3 +100,68 @@ def pytest_configure(config):
     custom_reporter = CustomTerminalReporter(config, sys.stdout)
     config.pluginmanager.unregister(standard_reporter)
     config.pluginmanager.register(custom_reporter, 'terminalreporter')
+
+
+ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+stat_re = re.compile(r'(\d+) (\w+)')
+
+
+def create_new_parseoutcomes(runresult_instance) -> Callable[[], dict[str, int]]:
+    """
+    In this function there is a new implementation of `RunResult.parseoutcomes`
+    https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L557
+
+
+    Decision of reimplement this method is made based on implementation of
+    `RunResult.assert_outcomes`
+
+    https://github.com/pytest-dev/pytest/blob/4a46ee8bc957b06265c016cc837862447dde79d2/src/_pytest/pytester.py#L613
+    """
+
+    def parseoutcomes() -> dict[str, int]:
+        lines_with_stats = dropwhile(lambda x: 'Results' not in x, runresult_instance.outlines)
+        next(lines_with_stats)  # drop Results line
+        res = {}
+        for i, line in enumerate(lines_with_stats):
+            line = ansi_escape.sub('', line).strip()  # clean colors
+            match = stat_re.match(line)
+
+            if match is None:
+                break
+
+            res[match.group(2)] = int(match.group(1))
+
+        return res
+
+    return parseoutcomes
+
+
+class PytesterWrapper:
+    """
+    This is class for for make almost transparent wrapper
+    arround pytester output and allow substitute
+    `parseoutcomes` method of `RunResult` instance.
+    """
+
+    __slot__ = ('_pytester',)
+
+    def __init__(self, pytester):
+        object.__setattr__(self, '_pytester', pytester)
+
+    def runpytest(self):
+        """wraper to overwritte `parseoutcomes` method of `RunResult` instance"""
+        res = self._pytester.runpytest()
+        assert res is not None
+        res.parseoutcomes = create_new_parseoutcomes(res)
+        return res
+
+    def __getattr__(self, name):
+        return getattr(self._pytester, name)
+
+    def __setattr__(self, name, value):
+        setattr(self._pytester, name, value)
+
+
+@pytest.fixture()
+def pytester_pretty(pytester):
+    return PytesterWrapper(pytester)
