@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     SummaryStats = tuple[list[tuple[str, dict[str, bool]]], str]
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 start_time = 0
 end_time = 0
 console = Console()
