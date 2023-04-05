@@ -36,21 +36,25 @@ def pytest_sessionfinish(session, exitstatus):
 class CustomTerminalReporter(TerminalReporter):
     def pytest_runtest_logreport(self, report: TestReport) -> None:
         super().pytest_runtest_logreport(report)
-        if report.failed:
-            file, line, func = report.location
-            self._write_progress_information_filling_space()
-            self.ensure_newline()
-            summary = f'{file}:{line} {func}'
-            self._tw.write(summary, red=True)
-            try:
-                msg = report.longrepr.reprcrash.message
-            except AttributeError:
-                pass
-            else:
-                msg = msg.replace('\n', ' ')
-                available_space = self._tw.fullwidth - len(summary) - 15
-                if available_space > 5:
-                    self._tw.write(f' - {msg[:available_space]}…')
+        if not report.failed:
+            return None
+        if report.when == 'teardown' and 'devtools-insert-assert:' in repr(report.longrepr):
+            # special case for devtools insert_assert "failures"
+            return None
+        file, line, func = report.location
+        self._write_progress_information_filling_space()
+        self.ensure_newline()
+        summary = f'{file}:{line} {func}'
+        self._tw.write(summary, red=True)
+        try:
+            msg = report.longrepr.reprcrash.message
+        except AttributeError:
+            pass
+        else:
+            msg = msg.replace('\n', ' ')
+            available_space = self._tw.fullwidth - len(summary) - 15
+            if available_space > 5:
+                self._tw.write(f' - {msg[:available_space]}…')
 
     def summary_stats(self) -> None:
         time_taken_ns = end_time - start_time
@@ -148,9 +152,9 @@ class PytesterWrapper:
     def __init__(self, pytester):
         object.__setattr__(self, '_pytester', pytester)
 
-    def runpytest(self):
+    def runpytest(self, *args, **kwargs):
         """wraper to overwritte `parseoutcomes` method of `RunResult` instance"""
-        res = self._pytester.runpytest()
+        res = self._pytester.runpytest(*args, **kwargs)
         assert res is not None
         res.parseoutcomes = create_new_parseoutcomes(res)
         return res
