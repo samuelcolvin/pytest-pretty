@@ -31,7 +31,9 @@ Including time taken for the test run:
 
 ## Installation
 
-    pip install -U pytest-pretty
+```sh
+pip install -U pytest-pretty
+```
 
 ## Usage with GitHub Actions
 
@@ -44,9 +46,8 @@ env:
 
 This will mean the pytest output is wider and easier to use, more importantly, it'll make the error summary table printed by pytest-pretty much easier to read, see [this](https://github.com/Textualize/rich/issues/2769) discussion for more details.
 
-
 ## `pytester_pretty` fixture
 
 The `pytest_pretty` provides `pytester_pretty` fixture that work with modified version of output. It is designed to drop in places replacement of `pytester` fixture and uses it internaly.
 
-So to use them it is required to set `pytest_plugins = "pytester"` as mentioned in pytest documentation https://docs.pytest.org/en/latest/reference/reference.html#pytester
+So to use them it is required to set `pytest_plugins = "pytester"` as mentioned in pytest documentation <https://docs.pytest.org/en/latest/reference/reference.html#pytester>
