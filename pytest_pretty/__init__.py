@@ -90,7 +90,7 @@ class CustomTerminalReporter(TerminalReporter):
                 table.add_row(
                     escape(file),
                     escape(func),
-                    str(function_line + 1),
+                    str(function_line + 1) if function_line is not None else '',
                     escape(error_line),
                     escape(error),
                 )
