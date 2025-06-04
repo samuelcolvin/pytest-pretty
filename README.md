@@ -1,6 +1,6 @@
 # pytest-pretty
 
-[![CI](https://github.com/samuelcolvin/pytest-pretty/workflows/CI/badge.svg?event=push)](https://github.com/samuelcolvin/pytest-pretty/actions?query=event%3Apush+branch%3Amain+workflow%3ACI)
+[![CI](https://github.com/samuelcolvin/pytest-pretty/actions/workflows/ci.yml/badge.svg)](https://github.com/samuelcolvin/pytest-pretty/actions?query=event%3Apush+branch%3Amain+workflow%3ACI)
 [![pypi](https://img.shields.io/pypi/v/pytest-pretty.svg)](https://pypi.python.org/pypi/pytest-pretty)
 [![versions](https://img.shields.io/pypi/pyversions/pytest-pretty.svg)](https://github.com/samuelcolvin/pytest-pretty)
 [![license](https://img.shields.io/github/license/samuelcolvin/pytest-pretty.svg)](https://github.com/samuelcolvin/pytest-pretty/blob/main/LICENSE)
