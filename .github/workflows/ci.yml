@@ -90,4 +90,4 @@ jobs:
 
       - run: uv build
 
-      - run: uv publish --trusted-publishing
+      - run: uv publish --trusted-publishing always
