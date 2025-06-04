@@ -2,18 +2,11 @@
 requires = ['hatchling']
 build-backend = 'hatchling.build'
 
-[tool.hatch.version]
-path = 'pytest_pretty/__init__.py'
-
-[tool.hatch.build.targets.sdist]
-# limit which files are included in the sdist (.tar.gz) asset,
-# see https://github.com/pydantic/pydantic/pull/4542
-include = ['/README.md', '/Makefile', '/pytest_pretty', '/requirements']
-
 [project]
 name = 'pytest-pretty'
 description = 'pytest plugin for printing summary data as I want it'
 authors = [{ name = 'Samuel Colvin', email = 's@muelcolvin.com' }]
+version = '1.3.0'
 license = 'MIT'
 license-files = ['LICENSE']
 readme = 'README.md'
@@ -40,7 +33,6 @@ classifiers = [
     'Topic :: Internet',
 ]
 requires-python = '>=3.9'
-dynamic = ['version']
 dependencies = ['pytest>=7', 'rich>=12']
 
 [project.entry-points.pytest11]

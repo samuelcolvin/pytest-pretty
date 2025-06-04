@@ -1,7 +1,9 @@
 from __future__ import annotations as _annotations
 
 import re
+import shutil
 import sys
+from importlib.metadata import version as _metadata_version
 from itertools import dropwhile
 from time import perf_counter_ns
 from typing import TYPE_CHECKING, Callable
@@ -17,10 +19,10 @@ if TYPE_CHECKING:
 
     SummaryStats = tuple[list[tuple[str, dict[str, bool]]], str]
 
-__version__ = '1.2.0'
+__version__ = _metadata_version('pytest-pretty')
 start_time = 0
 end_time = 0
-console = Console()
+console = Console(width=shutil.get_terminal_size()[0])
 
 
 def pytest_sessionstart(session):
@@ -68,7 +70,6 @@ class CustomTerminalReporter(TerminalReporter):
             console.print(f'{count:>10} {label}', style=color)
 
     def short_test_summary(self) -> None:
-        summary_items, _ = self.build_summary_stats_line()
         fail_reports = self.stats.get('failed', [])
         if fail_reports:
             table = Table(title='Summary of Failures', padding=(0, 2), border_style='cyan')
