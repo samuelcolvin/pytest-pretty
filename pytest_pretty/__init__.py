@@ -22,6 +22,32 @@ start_time = 0
 end_time = 0
 console = Console()
 
+AVAILABLE_COLUMNS = [
+    'File',
+    'Function!',
+    'Function Line!',
+    'Error Line',
+    'Error',
+
+    'File with Function Line',
+    'File with Error Line',
+]
+
+
+def pytest_addoption(parser):
+    group = parser.getgroup("pytest-pretty")
+    group.addoption(
+        "--pytest-pretty-columns",
+        action="store",
+        dest="columns",
+        default=",".join(AVAILABLE_COLUMNS[:5]),
+        help=(
+            "Comma separated list of columns to show. Add '!' to make column bold. Choices:\n"
+            + ", ".join(f"'{col.strip('!')}'" for col in AVAILABLE_COLUMNS)
+        ),
+        type=lambda opt: [(col.strip().strip("!"), col.strip().endswith("!")) for col in opt.split(",")],
+    )
+
 
 def pytest_sessionstart(session):
     global start_time
@@ -72,11 +98,8 @@ class CustomTerminalReporter(TerminalReporter):
         fail_reports = self.stats.get('failed', [])
         if fail_reports:
             table = Table(title='Summary of Failures', padding=(0, 2), border_style='cyan')
-            table.add_column('File')
-            table.add_column('Function', style='bold')
-            table.add_column('Function Line', style='bold')
-            table.add_column('Error Line')
-            table.add_column('Error')
+            for col, bold in self.config.option.columns:
+                table.add_column(col, style='bold' if bold else None)
             for report in fail_reports:
                 file, function_line, func = report.location
                 try:
@@ -86,14 +109,16 @@ class CustomTerminalReporter(TerminalReporter):
                 except AttributeError:
                     error_line = ''
                     error = ''
-
-                table.add_row(
-                    escape(file),
-                    escape(func),
-                    str(function_line + 1),
-                    escape(error_line),
-                    escape(error),
-                )
+                columns  = {
+                    "File": escape(file),
+                    "Function": escape(func),
+                    "Function Line": str(function_line + 1),
+                    "Error Line": escape(error_line),
+                    "Error": escape(error),
+                    "File with Function Line": f'{file}:{function_line + 1}',
+                    "File with Error Line": f'{escape(file)}:{error_line}',
+                }
+                table.add_row(*(columns[col] for col, _ in self.config.option.columns))
             console.print(table)
 
 
