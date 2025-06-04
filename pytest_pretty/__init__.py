@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 __version__ = _metadata_version('pytest-pretty')
 start_time = 0
 end_time = 0
-console = Console(file=sys.__stdout__, width=shutil.get_terminal_size()[0])
+console = Console(width=shutil.get_terminal_size()[0])
 
 
 def pytest_sessionstart(session):
