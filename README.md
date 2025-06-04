@@ -48,6 +48,6 @@ This will mean the pytest output is wider and easier to use, more importantly, i
 
 ## `pytester_pretty` fixture
 
-The `pytest_pretty` provides `pytester_pretty` fixture that work with modified version of output. It is designed to drop in places replacement of `pytester` fixture and uses it internaly.
+The `pytest_pretty` provides `pytester_pretty` fixture that work with modified version of output. It is designed to drop in places replacement of `pytester` fixture and uses it internally.
 
 So to use them it is required to set `pytest_plugins = "pytester"` as mentioned in pytest documentation <https://docs.pytest.org/en/latest/reference/reference.html#pytester>

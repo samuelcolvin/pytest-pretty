@@ -1,5 +1,0 @@
-black
-ruff
-isort[colors]
-pyupgrade
-pre-commit
