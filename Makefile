@@ -1,46 +1,45 @@
 .DEFAULT_GOAL := all
 sources = pytest_pretty
 
-.PHONY: install
-install:
-	pip install -U pip
-	pip install -r requirements/all.txt
-	pip install -e .
-	pre-commit install
+.PHONY: .uv
+.uv: ## Check that uv is installed
+	@uv --version || echo 'Please install uv: https://docs.astral.sh/uv/getting-started/installation/'
 
-.PHONY: refresh-lockfiles
-refresh-lockfiles:
-	@echo "Updating requirements/*.txt files using pip-compile"
-	find requirements/ -name '*.txt' ! -name 'all.txt' -type f -delete
-	pip-compile -q --resolver backtracking -o requirements/linting.txt requirements/linting.in
-	pip-compile -q --resolver backtracking -o requirements/pyproject.txt pyproject.toml
-	pip install --dry-run -r requirements/all.txt
+.PHONY: .pre-commit
+.pre-commit: ## Check that pre-commit is installed
+	@pre-commit -V || echo 'Please install pre-commit: https://pre-commit.com/'
+
+.PHONY: install
+install: .uv .pre-commit ## Install the package, dependencies, and pre-commit for local development
+	uv sync --frozen
+	pre-commit install --install-hooks
 
 .PHONY: format
-format:
-	pyupgrade --py37-plus --exit-zero-even-if-changed `find $(sources) -name "*.py" -type f`
-	isort $(sources)
-	black $(sources)
+format: ## Format the code
+	uv run ruff format
+	uv run ruff check --fix --fix-only
 
 .PHONY: lint
-lint:
-	ruff $(sources)
-	isort $(sources) --check-only --df
-	black $(sources) --check --diff
+lint: ## Lint the code
+	uv run ruff format --check
+	uv run ruff check
+
+.PHONY: test
+test: ## Run the tests
+	uv run pytest
 
 .PHONY: all
-all: lint
+all: format test
 
-.PHONY: clean
-clean:
-	rm -rf `find . -name __pycache__`
-	rm -f `find . -type f -name '*.py[co]' `
-	rm -f `find . -type f -name '*~' `
-	rm -f `find . -type f -name '.*~' `
-	rm -rf .cache
-	rm -rf .pytest_cache
-	rm -rf htmlcov
-	rm -rf *.egg-info
-	rm -f .coverage
-	rm -f .coverage.*
-	rm -rf build
+.PHONY: help
+help: ## Show this help (usage: make help)
+	@echo "Usage: make [recipe]"
+	@echo "Recipes:"
+	@awk '/^[a-zA-Z0-9_-]+:.*?##/ { \
+		helpMessage = match($$0, /## (.*)/); \
+		if (helpMessage) { \
+			recipe = $$1; \
+			sub(/:/, "", recipe); \
+			printf "  \033[36m%-20s\033[0m %s\n", recipe, substr($$0, RSTART + 3, RLENGTH); \
+		} \
+	}' $(MAKEFILE_LIST)
