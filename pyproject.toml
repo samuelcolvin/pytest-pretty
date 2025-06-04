@@ -8,31 +8,25 @@ path = 'pytest_pretty/__init__.py'
 [tool.hatch.build.targets.sdist]
 # limit which files are included in the sdist (.tar.gz) asset,
 # see https://github.com/pydantic/pydantic/pull/4542
-include = [
-    '/README.md',
-    '/Makefile',
-    '/pytest_pretty',
-    '/requirements',
-]
+include = ['/README.md', '/Makefile', '/pytest_pretty', '/requirements']
 
 [project]
 name = 'pytest-pretty'
 description = 'pytest plugin for printing summary data as I want it'
-authors = [
-    {name = 'Samuel Colvin', email = 's@muelcolvin.com'},
-]
-license = {file = 'LICENSE'}
+authors = [{ name = 'Samuel Colvin', email = 's@muelcolvin.com' }]
+license = 'MIT'
+license-files = ['LICENSE']
 readme = 'README.md'
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Intended Audience :: System Administrators',
@@ -45,12 +39,9 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: Internet',
 ]
-requires-python = '>=3.7'
+requires-python = '>=3.9'
 dynamic = ['version']
-dependencies = [
-    'pytest>=7',
-    'rich>=12',
-]
+dependencies = ['pytest>=7', 'rich>=12']
 
 [project.entry-points.pytest11]
 pretty = 'pytest_pretty'
@@ -58,15 +49,13 @@ pretty = 'pytest_pretty'
 [project.urls]
 repository = 'https://github.com/samuelcolvin/pytest-pretty'
 
+[dependency-groups]
+dev = ["ruff>=0.11.12"]
+
 [tool.pytest.ini_options]
 testpaths = 'tests'
 filterwarnings = 'error'
 xfail_strict = true
-
-[tool.ruff]
-line-length = 120
-extend-select = ['Q']
-flake8-quotes = {inline-quotes = 'single', multiline-quotes = 'double'}
 
 [tool.coverage.run]
 source = ['pytest_pretty']
@@ -81,16 +70,21 @@ exclude_lines = [
     '@overload',
 ]
 
-[tool.black]
-color = true
+[tool.ruff]
 line-length = 120
-target-version = ['py310']
-skip-string-normalization = true
+target-version = 'py39'
+include = ['pytest_pretty/**/*.py', 'tests/**/*.py']
 
-[tool.isort]
-line_length = 120
-known_first_party = 'pydantic'
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-combine_as_imports = true
+[tool.ruff.lint]
+extend-select = ['Q', 'RUF100', 'C90', 'UP', 'I']
+flake8-quotes = { inline-quotes = 'single', multiline-quotes = 'double' }
+isort = { combine-as-imports = true }
+mccabe = { max-complexity = 15 }
+
+[tool.ruff.lint.pydocstyle]
+convention = 'google'
+
+[tool.ruff.format]
+# don't format python in docstrings, pytest-examples takes care of it
+docstring-code-format = false
+quote-style = 'single'

@@ -1,6 +1,4 @@
-import pytest
-
-pytest_plugins = "pytester"
+pytest_plugins = 'pytester'
 
 
 test_str = """
@@ -20,12 +18,13 @@ def test_multiply():
     assert 2 * 2 == 5
 """
 
+
 def test_base(pytester):
     pytester.makepyfile(test_str)
     result = pytester.runpytest()
-    assert any("passed" in x and "1" in x for x in result.outlines)
-    assert any("skipped" in x and "1" in x for x in result.outlines)
-    assert any("xfailed" in x and "1" in x for x in result.outlines)
+    assert any('passed' in x and '1' in x for x in result.outlines)
+    assert any('skipped' in x and '1' in x for x in result.outlines)
+    assert any('xfailed' in x and '1' in x for x in result.outlines)
 
 
 def test_fixture(pytester_pretty):

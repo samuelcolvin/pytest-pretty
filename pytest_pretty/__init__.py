@@ -143,7 +143,7 @@ def create_new_parseoutcomes(runresult_instance) -> Callable[[], dict[str, int]]
 class PytesterWrapper:
     """
     This is class for for make almost transparent wrapper
-    arround pytester output and allow substitute
+    around pytester output and allow substitute
     `parseoutcomes` method of `RunResult` instance.
     """
 
@@ -153,7 +153,7 @@ class PytesterWrapper:
         object.__setattr__(self, '_pytester', pytester)
 
     def runpytest(self, *args, **kwargs):
-        """wraper to overwritte `parseoutcomes` method of `RunResult` instance"""
+        """wrapper to overwrite `parseoutcomes` method of `RunResult` instance"""
         res = self._pytester.runpytest(*args, **kwargs)
         assert res is not None
         res.parseoutcomes = create_new_parseoutcomes(res)
